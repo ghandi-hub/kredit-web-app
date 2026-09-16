@@ -1676,3 +1676,69 @@ textarea {
     text-decoration: none;
   }
 }
+.alert.success {
+  border: 1.5px solid var(--ink);
+  background: #eefad8;
+  color: var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.backup-alert-banner {
+  border: 1.5px solid var(--ink);
+  background: #fff8e8;
+  box-shadow: 3px 3px 0 var(--ink);
+  padding: 18px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+.backup-alert-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.backup-badge {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #b5471d;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.backup-alert-info p {
+  font-size: 12px;
+  color: #554f43;
+}
+.backup-card {
+  padding: 20px;
+  margin-top: 18px;
+}
+.backup-card h3 {
+  font-size: 14px;
+  margin: 12px 0 8px;
+}
+.backup-card p {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+.backup-card p small {
+  display: block;
+  font-size: 10px;
+}
+.warning-dot {
+  background: #d9532f !important;
+}
+.success-dot {
+  background: #568a22 !important;
+}
+@media (max-width: 800px) {
+  .backup-alert-banner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

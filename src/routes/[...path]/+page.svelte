@@ -43,7 +43,7 @@
 </script>
 
 <svelte:head><title>{view.title} — Kredit.</title></svelte:head>
-{#if view.kind === 'dashboard'}<Dashboard {view} />{:else}
+{#if view.kind === 'dashboard'}<Dashboard {view} {result} />{:else}
   <div class="page-heading">
     <div>
       {#if view.kind === 'detail' || view.kind === 'form' || view.kind === 'receipt'}<a

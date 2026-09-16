@@ -8,14 +8,17 @@
     CircleAlert,
     Check,
     Users,
+    Send,
   } from 'lucide-svelte';
+  import { enhance } from '$app/forms';
   import { businessToday, formatDate } from '$lib/utils/dates';
   import { rupiah } from '$lib/utils/money';
-  import type { AppView } from '$lib/types/ui';
+  import type { ActionResult, AppView } from '$lib/types/ui';
   import Metrics from './Metrics.svelte';
   import DataTable from './DataTable.svelte';
-  let { view }: { view: AppView } = $props();
-  let tab = $state('today');
+  let { view, result }: { view: AppView; result?: ActionResult | null } = $props();
+  let tab = $state('today'),
+    pendingBackup = $state(false);
   const today = businessToday();
   const due = $derived(
     view.installments.filter((i) =>
@@ -36,6 +39,51 @@
   </div>
   <div class="date-chip"><CalendarDays size={17} />{formatDate(new Date())}</div>
 </div>
+{#if result?.message}
+  <div class="alert {result.success ? 'success' : ''}" role="alert">
+    <div style="display:flex;align-items:center;gap:10px;">
+      {#if result.success}
+        <Check size={18} />
+      {:else}
+        <CircleAlert size={18} />
+      {/if}
+      <span>{result.message}</span>
+    </div>
+  </div>
+{/if}
+{#if view.backupStatus?.needsBackup}
+  <div class="backup-alert-banner">
+    <div class="backup-alert-info">
+      <div class="backup-badge"><CircleAlert size={15} /> PERLU CADANGAN DATABASE</div>
+      <p>
+        {#if view.backupStatus.lastBackupAt}
+          Database belum dicadangkan selama <strong>{view.backupStatus.daysAgo} hari</strong>
+          (terakhir:
+          {view.backupStatus.lastBackupAt}).
+        {:else}
+          Database <strong>belum pernah dicadangkan</strong> ke Telegram.
+        {/if}
+        Cadangkan data sekarang agar data transaksi Anda selalu aman.
+      </p>
+    </div>
+    <form
+      method="POST"
+      action="?/backup"
+      use:enhance={() => {
+        pendingBackup = true;
+        return async ({ update }) => {
+          await update();
+          pendingBackup = false;
+        };
+      }}
+    >
+      <button class="button primary" disabled={pendingBackup}>
+        <Send size={15} />
+        {pendingBackup ? 'Mengirim ke Telegram…' : 'Cadangkan ke Telegram'}
+      </button>
+    </form>
+  </div>
+{/if}
 <div class="dashboard-actions">
   <div class="live-label"><span class="tiny-dot"></span>DATA TRANSAKSI TERKINI</div>
   <div class="button-group">
@@ -101,6 +149,49 @@
         ><span><ArrowUpRight size={17} />Lihat laporan usaha</span><ArrowRight size={17} /></a
       >
     </section>
+    <!-- <section class="panel backup-card">
+      <div class="eyebrow">
+        <span
+          class="tiny-dot"
+          class:warning-dot={view.backupStatus?.needsBackup}
+          class:success-dot={!view.backupStatus?.needsBackup}
+        ></span>
+        {view.backupStatus?.needsBackup ? 'PERLU CADANGAN' : 'CADANGAN AMAN'}
+      </div>
+      <h3>Cadangan Telegram</h3>
+      <p>
+        {#if view.backupStatus?.lastBackupAt}
+          Terakhir: <strong>{view.backupStatus.lastBackupAt}</strong>
+          <small
+            >({view.backupStatus.daysAgo === 0
+              ? 'Hari ini'
+              : `${view.backupStatus.daysAgo} hari lalu`})</small
+          >
+        {:else}
+          Belum pernah dicadangkan ke Telegram.
+        {/if}
+      </p>
+      <form
+        method="POST"
+        action="?/backup"
+        use:enhance={() => {
+          pendingBackup = true;
+          return async ({ update }) => {
+            await update();
+            pendingBackup = false;
+          };
+        }}
+      >
+        <button
+          class="button {view.backupStatus?.needsBackup ? 'primary' : ''}"
+          style="width: 100%; justify-content: space-between;"
+          disabled={pendingBackup}
+        >
+          <span>{pendingBackup ? 'Mengirim…' : 'Kirim Backup Manual'}</span>
+          <Send size={14} />
+        </button>
+      </form>
+    </section> -->
   </aside>
 </div>
 <section class="panel recent-panel">

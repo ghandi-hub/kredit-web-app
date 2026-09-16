@@ -103,7 +103,7 @@ export function id(value: string) {
 }
 export async function audit(
   c: Awaited<ReturnType<typeof connection>>,
-  session: ClientSession,
+  session: ClientSession | undefined,
   actorId: ObjectId,
   action: string,
   entityType: AuditDocument['entityType'],
@@ -112,6 +112,6 @@ export async function audit(
 ) {
   await c.auditLogs.insertOne(
     { _id: new ObjectId(), actorId, action, entityType, entityId, metadata, createdAt: new Date() },
-    { session },
+    session ? { session } : {},
   );
 }

@@ -18,6 +18,7 @@
     "test:e2e": "playwright test",
     "db:seed": "tsx --env-file=.env scripts/seed.ts",
     "db:check": "tsx --env-file=.env scripts/check-db.ts",
+    "db:backup": "tsx --env-file=.env scripts/backup-telegram.ts",
     "storage:cleanup": "tsx --env-file=.env scripts/cleanup-storage.ts"
   },
   "dependencies": {

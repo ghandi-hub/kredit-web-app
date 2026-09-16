@@ -43,6 +43,13 @@ export interface AppView {
   customerName: string;
   outstanding: number;
   recordId: string;
+  backupStatus?: BackupStatus;
+}
+export interface BackupStatus {
+  lastBackupAt: string | null;
+  daysAgo: number | null;
+  needsBackup: boolean;
+  rawDate?: string;
 }
 export interface ActionResult {
   message?: string;

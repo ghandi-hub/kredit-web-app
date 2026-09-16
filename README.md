@@ -87,6 +87,13 @@ Aplikasi ini menyederhanakan operasional usaha kredit barang skala kecil hingga 
 - Sesi privat berbasis token hash yang dapat dicabut.
 - Pencatatan riwayat aktivitas lengkap pada collection `audit_logs`.
 
+### 9. 🤖 Cadangan Database ke Telegram & Pengingat 30 Hari
+
+- **Pengingat di Dashboard:** Sistem otomatis melacak waktu sejak cadangan terakhir berdasarkan log audit. Jika sudah ≥ 30 hari atau belum pernah dicadangkan, dashboard menampilkan banner peringatan mencolok beserta status cadangan di panel samping.
+- **Cadangkan Sekali Klik:** Pemilik cukup menekan satu tombol di dashboard untuk mengekspor seluruh koleksi database dan mengirimkannya langsung ke Telegram.
+- **Ekspor Ringan & Aman:** Berkas dikompresi menjadi `.json.gz` dan dikirim langsung ke chat Telegram privat pemilik melalui Telegram Bot API.
+- **Dukungan CLI:** Perintah `npm run db:backup` juga tersedia untuk pencadangan manual lewat terminal.
+
 ---
 
 ## Prinsip & Aturan Bisnis
@@ -131,6 +138,7 @@ Aplikasi ini menyederhanakan operasional usaha kredit barang skala kecil hingga 
 kredit/
 ├── e2e/                        # End-to-End browser tests (Playwright)
 ├── scripts/                    # Skrip CLI utilitas & pemeliharaan
+│   ├── backup-telegram.ts      # Pencadangan database manual ke Telegram via CLI
 │   ├── check-cloudinary.ts     # Verifikasi upload & download privat Cloudinary
 │   ├── check-db.ts             # Verifikasi koneksi MongoDB Atlas
 │   ├── cleanup-storage.ts      # Pembersihan berkas KTP yatim di Cloudinary
@@ -146,6 +154,7 @@ kredit/
 │   │   ├── schemas/            # Skema validasi Zod untuk formulir
 │   │   ├── server/             # Logika backend & database
 │   │   │   ├── auth.ts         # Login, sesi token, logout, brute-force rate limit
+│   │   │   ├── backup.ts       # Service ekspor database & integrasi Telegram Bot API
 │   │   │   ├── credits.ts      # Service kontrak kredit & penjadwalan
 │   │   │   ├── db.ts           # Koneksi MongoDB, session transaksi, pembuatan indeks
 │   │   │   ├── errors.ts       # Domain error handling
@@ -164,6 +173,7 @@ kredit/
 │       ├── login/              # Halaman login pemilik
 │       └── logout/             # Endpoint logout
 └── tests/                      # Unit & integration test suites
+    ├── backup.test.ts          # Pengujian konfigurasi & kompresi cadangan
     ├── cloudinary-fake.ts      # Mocking Cloudinary untuk testing
     ├── finance.test.ts         # Pengujian logika finansial & waterfall
     ├── integration.test.ts     # Pengujian transaksi MongoDB di memory server
@@ -211,6 +221,8 @@ Sesuaikan nilai variabel berikut pada berkas `.env`:
 | `CLOUDINARY_API_KEY`    | API Key Cloudinary                                                | `123456789012345`                                                        |
 | `CLOUDINARY_API_SECRET` | API Secret Cloudinary                                             | `AbCdEfGhIjKlMnOpQrStUvWxYz`                                             |
 | `ORIGIN`                | URL asal aplikasi untuk CSRF & security check                     | `http://localhost:5173` (lokal) atau `https://kredit.example.com` (prod) |
+| `TELEGRAM_BOT_TOKEN`    | Token bot Telegram dari @BotFather (untuk pengiriman cadangan)    | `1234567890:ABCDefGhIJKlmNoPQRsTUVwxyZ`                                  |
+| `TELEGRAM_CHAT_ID`      | ID chat Telegram pemilik (dapat dilihat via @userinfobot)         | `987654321`                                                              |
 
 ### 3. Inisialisasi Database & Akun Admin
 
@@ -257,6 +269,7 @@ Buka peramban di `http://localhost:5173`. Masuk menggunakan username dan passwor
 | `npm run test:smoke`       | Menjalankan smoke test build server                                                   |
 | `npm run db:seed`          | Menginisialisasi indeks collection dan akun admin pertama                             |
 | `npm run db:check`         | Memeriksa status konektivitas ke database MongoDB                                     |
+| `npm run db:backup`        | Menjalankan ekspor dan pengiriman cadangan database langsung ke Telegram via CLI      |
 | `npm run storage:cleanup`  | Menjalankan batch penghapusan berkas KTP tertunda di Cloudinary (maksimal 100 berkas) |
 | `npm run build`            | Melakukan build aplikasi untuk lingkungan produksi                                    |
 | `npm run preview`          | Menjalankan pratinjau hasil build lokal                                               |

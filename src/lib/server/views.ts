@@ -1,4 +1,5 @@
 import { supplierName } from './legacy-supplier';
+import { getBackupStatus } from './backup';
 import { ObjectId, type Filter } from 'mongodb';
 import { connection, id } from './db';
 import { DomainError } from './errors';
@@ -280,6 +281,7 @@ function empty(section: string): AppView {
     customerName: '',
     outstanding: 0,
     recordId: '',
+    backupStatus: { lastBackupAt: null, daysAgo: null, needsBackup: false },
   };
 }
 function personFields(): Field[] {
@@ -357,11 +359,12 @@ export async function loadView(path: string, url: URL): Promise<AppView> {
     return v;
   }
   if (section === 'dashboard') {
-    const [credits, payments, installments, totalCustomers] = await Promise.all([
+    const [credits, payments, installments, totalCustomers, backupStatus] = await Promise.all([
       creditRows(),
       paymentRows(),
       installmentRows(),
       c.customers.countDocuments(),
+      getBackupStatus(),
     ]);
     const today = businessToday(),
       month = today.slice(0, 7),
@@ -369,6 +372,7 @@ export async function loadView(path: string, url: URL): Promise<AppView> {
     v.kind = 'dashboard';
     v.title = 'Dashboard';
     v.subtitle = 'Semua yang perlu Anda ketahui tentang usaha hari ini.';
+    v.backupStatus = backupStatus;
     v.metrics = [
       {
         label: 'Total piutang',

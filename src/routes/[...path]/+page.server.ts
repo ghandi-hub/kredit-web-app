@@ -4,6 +4,7 @@ import { id } from '$lib/server/db';
 import { savePerson, deletePerson } from '$lib/server/people';
 import { saveCredit, deleteCredit } from '$lib/server/credits';
 import { createPayment, paymentPreview } from '$lib/server/payments';
+import { backupToTelegram } from '$lib/server/backup';
 import { DomainError, safeError } from '$lib/server/errors';
 import { creditSchema } from '$lib/schemas/forms';
 import {
@@ -105,5 +106,18 @@ export const actions: Actions = {
       return fail(400, safeError(e));
     }
     redirect(303, `/${section}`);
+  },
+  backup: async ({ locals }) => {
+    try {
+      if (!locals.user) throw new DomainError('UNAUTHORIZED', 'Silakan masuk kembali.');
+      const actor = id(locals.user.id);
+      const res = await backupToTelegram(actor);
+      return {
+        success: true,
+        message: `Database berhasil dicadangkan (${res.fileName}, ${res.sizeKb} KB) dan dikirim ke Telegram!`,
+      };
+    } catch (e) {
+      return fail(400, { ...safeError(e), success: false });
+    }
   },
 };
