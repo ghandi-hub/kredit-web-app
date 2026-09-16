@@ -1,0 +1,12 @@
+node_modules
+.svelte-kit
+build
+package-lock.json
+AI_CODING_RULES.md
+DATABASE_SCHEMA.md
+IMPLEMENTATION_PLAN.md
+TECHNICAL_SPEC.md
+PRD.md
+.private
+test-results
+playwright-report
