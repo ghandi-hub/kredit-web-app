@@ -18,6 +18,7 @@
   } from 'lucide-svelte';
   import type { ActionResult } from '$lib/types/ui';
   import { rupiah } from '$lib/utils/money';
+  import { buildWhatsAppUrl } from '$lib/utils/whatsapp';
   import Dashboard from '$lib/components/Dashboard.svelte';
   import Metrics from '$lib/components/Metrics.svelte';
   import DataTable from '$lib/components/DataTable.svelte';
@@ -37,8 +38,14 @@
   ];
   function whatsapp() {
     const due = view.installments.find((i) => Number(i.remaining) > 0);
-    const phone = view.customerPhone.replace(/\D/g, '').replace(/^0/, '62');
-    return `https://wa.me/${phone}?text=${encodeURIComponent(`Halo Bapak/Ibu ${view.customerName}, kami mengingatkan cicilan ${view.subtitle} sebesar ${rupiah(Number(due?.remaining || 0))}, jatuh tempo ${due?.dueDate || ''}. Terima kasih.`)}`;
+    return buildWhatsAppUrl(
+      view.customerPhone,
+      view.customerName,
+      view.subtitle,
+      Number(due?.remaining || view.outstanding),
+      String(due?.dueDate || ''),
+      String(due?.status || ''),
+    );
   }
 </script>
 
@@ -68,6 +75,13 @@
               ? 'Catat pembayaran'
               : 'Tambah pelanggan'}</a
         >{/if}{#if view.editHref}<a class="button" href={view.editHref}><Pencil size={16} />Edit</a
+        >{/if}{#if view.canPay && view.customerPhone && view.section === 'credits'}<a
+          class="button no-print"
+          href={whatsapp()}
+          target="_blank"
+          rel="noreferrer"
+          title="Kirim pengingat WhatsApp ke pelanggan"
+          ><MessageCircle size={16} />Pengingat WhatsApp</a
         >{/if}{#if view.canPay}<a class="button primary" href={view.paymentHref}
           ><Wallet size={17} />Catat pembayaran</a
         >{/if}{#if view.kind === 'receipt'}<button

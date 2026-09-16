@@ -432,6 +432,20 @@ svg {
 .icon-button:hover {
   background: #e9ebdf;
 }
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-end;
+}
+.whatsapp-btn {
+  color: #128c7e;
+  border-radius: 4px;
+}
+.whatsapp-btn:hover {
+  background: #e7f8f2;
+  color: #075e54;
+}
 .metrics {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

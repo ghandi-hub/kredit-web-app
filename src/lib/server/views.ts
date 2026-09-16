@@ -6,6 +6,7 @@ import { DomainError } from './errors';
 import { getInstallmentStatus } from './finance';
 import { businessDate, businessToday, formatDate } from '../utils/dates';
 import { rupiah } from '../utils/money';
+import { buildWhatsAppUrl } from '../utils/whatsapp';
 import type { AppView, Column, Field, Row } from '../types/ui';
 import type { CreditDocument, PaymentDocument } from '../types/entities';
 export const installmentColumns: Column[] = [
@@ -207,6 +208,7 @@ async function installmentRows(creditId?: ObjectId) {
       customerName: string;
       phone: string;
       contractNumber: string;
+      itemName: string;
     }>([
       { $match: creditId ? { creditId } : { $expr: { $lt: ['$paidAmount', '$amount'] } } },
       { $sort: creditId ? { sequence: 1 } : { dueDate: 1 } },
@@ -232,28 +234,44 @@ async function installmentRows(creditId?: ObjectId) {
           customerName: { $arrayElemAt: ['$customer.name', 0] },
           phone: { $arrayElemAt: ['$customer.phone', 0] },
           contractNumber: '$credit.contractNumber',
+          itemName: '$credit.item.name',
         },
       },
       { $project: { credit: 0, customer: 0 } },
     ])
     .toArray();
-  return docs.map(
-    (d) =>
-      ({
-        id: d._id.toHexString(),
-        href: `/credits/${d.creditId}`,
-        sequence: d.sequence,
-        amount: d.amount,
-        paidAmount: d.paidAmount,
-        remaining: d.amount - d.paidAmount,
-        dueDate: formatDate(d.dueDate),
-        rawDueDate: businessToday(d.dueDate),
-        status: labels[getInstallmentStatus(d)],
-        customerName: d.customerName,
-        phone: d.phone,
-        contractNumber: d.contractNumber,
-      }) satisfies Row,
-  );
+  return docs.map((d) => {
+    const remaining = d.amount - d.paidAmount;
+    const status = labels[getInstallmentStatus(d)];
+    const whatsappUrl =
+      d.phone && remaining > 0
+        ? buildWhatsAppUrl(
+            d.phone,
+            d.customerName || 'Pelanggan',
+            d.itemName || 'barang',
+            remaining,
+            formatDate(d.dueDate),
+            status,
+          )
+        : '';
+
+    return {
+      id: d._id.toHexString(),
+      href: `/credits/${d.creditId}`,
+      sequence: d.sequence,
+      amount: d.amount,
+      paidAmount: d.paidAmount,
+      remaining,
+      dueDate: formatDate(d.dueDate),
+      rawDueDate: businessToday(d.dueDate),
+      status,
+      customerName: d.customerName,
+      phone: d.phone,
+      contractNumber: d.contractNumber,
+      itemName: d.itemName,
+      whatsappUrl,
+    } satisfies Row;
+  });
 }
 function empty(section: string): AppView {
   return {

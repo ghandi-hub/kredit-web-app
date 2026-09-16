@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ArrowUpRight, Inbox } from 'lucide-svelte';
+  import { ArrowUpRight, Inbox, MessageCircle } from 'lucide-svelte';
   import { rupiah } from '$lib/utils/money';
   import type { Column, Row } from '$lib/types/ui';
   let {
@@ -18,7 +18,7 @@
     <thead
       ><tr
         >{#each columns as col}<th class:align-right={col.money}>{col.label}</th>{/each}<th
-          ><span class="sr-only">Detail</span></th
+          ><span class="sr-only">Aksi</span></th
         ></tr
       ></thead
     >
@@ -35,12 +35,21 @@
                 )}{:else if col === columns[0] && row.href}<a class="table-link" href={row.href}
                   >{row[col.key]}</a
                 >{:else}{row[col.key] ?? '—'}{/if}</td
-            >{/each}<td
-            >{#if row.href}<a
-                class="icon-button"
-                href={row.href}
-                aria-label={`Lihat detail ${row[columns[0].key]}`}><ArrowUpRight size={16} /></a
-              >{/if}</td
+            >{/each}<td class="action-cell"
+            ><div class="row-actions">
+              {#if row.whatsappUrl}<a
+                  class="icon-button whatsapp-btn no-print"
+                  href={String(row.whatsappUrl)}
+                  target="_blank"
+                  rel="noreferrer"
+                  title="Kirim pengingat WhatsApp"
+                  aria-label="Kirim pengingat WhatsApp"><MessageCircle size={15} /></a
+                >{/if}{#if row.href}<a
+                  class="icon-button"
+                  href={row.href}
+                  aria-label={`Lihat detail ${row[columns[0].key]}`}><ArrowUpRight size={16} /></a
+                >{/if}
+            </div></td
           ></tr
         >{/each}</tbody
     >
