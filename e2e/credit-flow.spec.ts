@@ -66,6 +66,7 @@ test('protected routes, customer, credit, payment, receipt, mobile and logout', 
   await expect(page.getByRole('link', { name: 'Catat pembayaran', exact: true })).toHaveCount(0);
   await expect(page.locator('tbody .badge').filter({ hasText: 'Lunas' })).toHaveCount(3);
   await page.goto('/dashboard');
+  await expect(page.locator('.sidebar-close')).toBeHidden();
   await page.screenshot({ path: 'test-results/dashboard-desktop.png', fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({ path: 'test-results/dashboard-mobile.png', fullPage: true });
@@ -74,10 +75,12 @@ test('protected routes, customer, credit, payment, receipt, mobile and logout', 
   );
   await page.getByRole('button', { name: 'Buka menu' }).click();
   await expect(page.locator('.sidebar')).toHaveClass(/open/);
+  await expect(page.locator('.sidebar-close')).toBeVisible();
   await page.locator('.sidebar-backdrop').click();
   await expect(page.locator('.sidebar')).not.toHaveClass(/open/);
   await page.getByRole('button', { name: 'Buka menu' }).click();
   await expect(page.locator('.sidebar')).toHaveClass(/open/);
+  await expect(page.locator('.sidebar-close')).toBeVisible();
   await page.getByRole('button', { name: 'Tutup menu' }).click();
   await expect(page.locator('.sidebar')).not.toHaveClass(/open/);
   await page.getByRole('button', { name: 'Buka menu' }).click();

@@ -72,18 +72,32 @@
       <div class="workspace-label"><span class="tiny-dot"></span> RUANG KERJA PEMILIK</div>
       <div class="nav-label">MENU UTAMA</div>
       <nav>
-        {#each links as link}<a
+        {#each links as link}
+          {@const isPending = Boolean(navigating.to?.url.pathname.startsWith(link.href))}
+          <a
             href={link.href}
             class:active={page.url.pathname.startsWith(link.href)}
+            class:nav-pending={isPending}
             onclick={() => (mobile = false)}
-            ><link.icon size={19} /><span>{link.label}</span
-            >{#if page.url.pathname.startsWith(link.href)}<ArrowUpRight size={16} />{/if}</a
-          >{/each}
+          >
+            <link.icon size={19} />
+            <span>{link.label}</span>
+          </a>
+        {/each}
       </nav>
       <div class="sidebar-bottom">
-        <a class="activity-link" href="/audit" onclick={() => (mobile = false)}
-          ><History size={18} />Riwayat aktivitas</a
+        <a
+          class="activity-link"
+          class:nav-pending={Boolean(navigating.to?.url.pathname.startsWith('/audit'))}
+          href="/audit"
+          onclick={() => (mobile = false)}
         >
+          <History size={18} />
+          <span>Riwayat aktivitas</span>
+          {#if navigating.to?.url.pathname.startsWith('/audit')}
+            <span class="menu-spinner" aria-label="Memuat"></span>
+          {/if}
+        </a>
         <div class="sidebar-note">
           <span class="eyebrow">USAHA LEBIH TERTATA</span>
           <p>Satu tempat untuk<br />setiap cicilan.</p>
@@ -110,6 +124,12 @@
             >{links.find((l) => page.url.pathname.startsWith(l.href))?.label ||
               (page.url.pathname === '/search' ? 'Hasil pencarian' : 'Riwayat aktivitas')}</strong
           >
+          {#if navigating.to}
+            <span class="topbar-loading-indicator" role="status" aria-live="polite">
+              <span class="spinner-dot"></span>
+              <span>Memuat...</span>
+            </span>
+          {/if}
         </div>
         <div class="topbar-right">
           <form class="global-search" action="/search">
@@ -122,16 +142,38 @@
           <span class="owner-badge"><span class="tiny-dot"></span>Admin</span>
         </div>
       </header>
-      {#if navigating.to}<div
-          class="loading-bar"
-          role="status"
-          aria-label="Memuat halaman"
-        ></div>{/if}
-      <main class="content">{@render children()}</main>
+      {#if navigating.to}
+        <div class="loading-bar" role="status" aria-label="Memuat halaman">
+          <div class="loading-bar-inner"></div>
+        </div>
+      {/if}
+      <main class="content" class:content-loading={Boolean(navigating.to)}>
+        {#if navigating.to}
+          <div
+            class="page-loading-cover"
+            role="status"
+            aria-live="polite"
+            aria-label="Memuat data halaman"
+          >
+            <div class="loading-badge">
+              <span class="spinner"></span>
+              <div class="loading-badge-text">
+                <strong>Memuat data…</strong>
+                <span>Menghubungi server</span>
+              </div>
+            </div>
+          </div>
+        {/if}
+        {@render children()}
+      </main>
       <footer class="app-footer">
         <span>KREDIT. / SISTEM MANAJEMEN KREDIT BARANG</span><span
           >Rapi dicatat. Mudah dipantau.</span
         >
       </footer>
     </div>
-  </div>{:else}{@render children()}{/if}
+  </div>{:else}{#if navigating.to}
+    <div class="loading-bar" role="status" aria-label="Memuat halaman">
+      <div class="loading-bar-inner"></div>
+    </div>
+  {/if}{@render children()}{/if}
