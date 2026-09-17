@@ -250,6 +250,15 @@
     aria-labelledby="delete-title"
     use:openDialog
     oncancel={() => (confirm = false)}
+    onclick={(e) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const inDialog =
+        rect.top <= e.clientY &&
+        e.clientY <= rect.top + rect.height &&
+        rect.left <= e.clientX &&
+        e.clientX <= rect.left + rect.width;
+      if (!inDialog) confirm = false;
+    }}
   >
     <div class="panel-heading">
       <h2 id="delete-title">Hapus {view.title}?</h2>
