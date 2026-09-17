@@ -23,13 +23,52 @@
     { href: '/payments', label: 'Pembayaran', icon: Wallet },
     { href: '/reports', label: 'Laporan', icon: ChartNoAxesCombined },
   ];
+
+  $effect(() => {
+    if (mobile) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  });
 </script>
 
+<svelte:window
+  onkeydown={(e) => {
+    if (e.key === 'Escape' && mobile) mobile = false;
+  }}
+  onresize={() => {
+    if (window.innerWidth > 760 && mobile) mobile = false;
+  }}
+  onpopstate={() => (mobile = false)}
+/>
+
 {#if data.user}<div class="app-shell">
+    {#if mobile}
+      <button
+        type="button"
+        class="sidebar-backdrop"
+        onclick={() => (mobile = false)}
+        aria-label="Tutup menu samping"
+        tabindex="-1"
+      ></button>
+    {/if}
     <aside class="sidebar" class:open={mobile}>
-      <a href="/dashboard" class="brand" onclick={() => (mobile = false)}
-        ><span class="brand-mark">k</span>KREDIT<span class="brand-dot">.</span></a
-      >
+      <div class="sidebar-header">
+        <a href="/dashboard" class="brand" onclick={() => (mobile = false)}
+          ><span class="brand-mark">k</span>KREDIT<span class="brand-dot">.</span></a
+        >
+        <button
+          type="button"
+          class="icon-button sidebar-close"
+          onclick={() => (mobile = false)}
+          aria-label="Tutup menu"
+        >
+          <X size={20} />
+        </button>
+      </div>
       <div class="workspace-label"><span class="tiny-dot"></span> RUANG KERJA PEMILIK</div>
       <div class="nav-label">MENU UTAMA</div>
       <nav>
@@ -42,7 +81,9 @@
           >{/each}
       </nav>
       <div class="sidebar-bottom">
-        <a class="activity-link" href="/audit"><History size={18} />Riwayat aktivitas</a>
+        <a class="activity-link" href="/audit" onclick={() => (mobile = false)}
+          ><History size={18} />Riwayat aktivitas</a
+        >
         <div class="sidebar-note">
           <span class="eyebrow">USAHA LEBIH TERTATA</span>
           <p>Satu tempat untuk<br />setiap cicilan.</p>
@@ -63,7 +104,7 @@
           <button
             class="icon-button mobile-menu"
             onclick={() => (mobile = !mobile)}
-            aria-label="Buka menu"
+            aria-label={mobile ? 'Tutup menu' : 'Buka menu'}
             >{#if mobile}<X size={20} />{:else}<Menu size={20} />{/if}</button
           ><span>Ruang kerja</span><span class="slash">/</span><strong
             >{links.find((l) => page.url.pathname.startsWith(l.href))?.label ||

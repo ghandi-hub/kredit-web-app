@@ -73,6 +73,14 @@ test('protected routes, customer, credit, payment, receipt, mobile and logout', 
     true,
   );
   await page.getByRole('button', { name: 'Buka menu' }).click();
+  await expect(page.locator('.sidebar')).toHaveClass(/open/);
+  await page.locator('.sidebar-backdrop').click();
+  await expect(page.locator('.sidebar')).not.toHaveClass(/open/);
+  await page.getByRole('button', { name: 'Buka menu' }).click();
+  await expect(page.locator('.sidebar')).toHaveClass(/open/);
+  await page.getByRole('button', { name: 'Tutup menu' }).click();
+  await expect(page.locator('.sidebar')).not.toHaveClass(/open/);
+  await page.getByRole('button', { name: 'Buka menu' }).click();
   await page.getByRole('button', { name: 'Keluar', exact: true }).click();
   await expect(page).toHaveURL(/login/);
 });
